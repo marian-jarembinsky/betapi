@@ -1,0 +1,6 @@
+/Users/marianjarembinsky/IdeaProjects/betapi/src/main/java/com/example/betapi/BetapiApplication.java
+/Users/marianjarembinsky/IdeaProjects/betapi/src/main/java/com/example/betapi/config/GoogleSheetsConfig.java
+/Users/marianjarembinsky/IdeaProjects/betapi/src/main/java/com/example/betapi/config/SecurityConfig.java
+/Users/marianjarembinsky/IdeaProjects/betapi/src/main/java/com/example/betapi/controller/MatchController.java
+/Users/marianjarembinsky/IdeaProjects/betapi/src/main/java/com/example/betapi/model/Match.java
+/Users/marianjarembinsky/IdeaProjects/betapi/src/main/java/com/example/betapi/service/GoogleSheetsService.java
