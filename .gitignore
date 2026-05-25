@@ -1,0 +1,10 @@
+# Maven build output
+target/
+
+# Google credentials (SENSITIVE - never commit!)
+src/main/resources/credentials.json
+src/main/resources/credentials.json.template
+
+# IDE files
+.idea/
+*.iml

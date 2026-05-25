@@ -1,7 +1,0 @@
-com/example/betapi/controller/MatchController.class
-com/example/betapi/model/Match$MatchBuilder.class
-com/example/betapi/config/SecurityConfig.class
-com/example/betapi/config/GoogleSheetsConfig.class
-com/example/betapi/service/GoogleSheetsService.class
-com/example/betapi/BetapiApplication.class
-com/example/betapi/model/Match.class
