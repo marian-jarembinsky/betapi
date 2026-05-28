@@ -64,7 +64,7 @@ Follow these steps to get BetAPI up and running:
 - [ ] Go to [Google OAuth Playground](https://developers.google.com/oauthplayground/)
 - [ ] Click gear icon → "Use your own OAuth credentials"
 - [ ] Enter your Client ID and Client Secret
-- [ ] Select scopes: `openid`, `email`, `profile`
+- [ ] Select scopes: > Google OAuth2 API v2 > `openid`, `email`, `profile`
 - [ ] Authorize and get access token
 - [ ] Test with cURL:
   ```bash

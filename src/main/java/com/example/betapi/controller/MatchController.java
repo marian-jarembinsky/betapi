@@ -1,6 +1,7 @@
 package com.example.betapi.controller;
 
 import com.example.betapi.model.Match;
+import com.example.betapi.model.UpdateResultRequest;
 import com.example.betapi.service.GoogleSheetsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,22 @@ public class MatchController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("BetAPI is running");
+    }
+
+    @PutMapping("/matches/{matchNumber}/result")
+    public ResponseEntity<String> updateResult(
+            @PathVariable Integer matchNumber,
+            @RequestBody UpdateResultRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        try {
+            log.info("Updating result for match {} by user: {}", matchNumber, jwt.getSubject());
+            googleSheetsService.updateResult(matchNumber, request.getResult());
+            return ResponseEntity.ok("Result updated successfully");
+        } catch (IOException e) {
+            log.error("Error updating result for match {}", matchNumber, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update result: " + e.getMessage());
+        }
     }
 }
 

@@ -31,7 +31,7 @@ public class GoogleSheetsConfig {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         GoogleCredentials credentials = GoogleCredentials
                 .fromStream(new FileInputStream(credentialsFilePath))
-                .createScoped(Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY));
+                .createScoped(Collections.singletonList(SheetsScopes.SPREADSHEETS));
 
         return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpCredentialsAdapter(credentials))
                 .setApplicationName(APPLICATION_NAME)
