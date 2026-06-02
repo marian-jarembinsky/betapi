@@ -2,7 +2,9 @@ package com.example.betapi.controller;
 
 import com.example.betapi.model.Match;
 import com.example.betapi.model.UpdateResultRequest;
+import com.example.betapi.model.UserConfig;
 import com.example.betapi.service.GoogleSheetsService;
+import com.example.betapi.service.UserConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import java.util.List;
 public class MatchController {
 
     private final GoogleSheetsService googleSheetsService;
+    private final UserConfigService userConfigService;
 
     @GetMapping("/matches")
     public ResponseEntity<List<Match>> getMatches(@AuthenticationPrincipal Jwt jwt) {
@@ -83,9 +86,28 @@ public class MatchController {
             @RequestBody UpdateResultRequest request,
             @AuthenticationPrincipal Jwt jwt) {
         try {
-            log.info("Updating result for match {} by user: {}", matchNumber, jwt.getSubject());
-            googleSheetsService.updateResult(matchNumber, request.getResult());
-            return ResponseEntity.ok("Result updated successfully");
+            String userEmail = jwt.getClaimAsString("email");
+            log.info("Updating result for match {} by user: {}", matchNumber, userEmail);
+
+            // Load user config from UserConfig sheet
+            UserConfig userConfig = userConfigService.getUserConfig(userEmail)
+                    .orElse(null);
+
+            if (userConfig == null) {
+                log.warn("User {} not found or not active in UserConfig", userEmail);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("User not authorized to submit results");
+            }
+
+            if ("VIEWER".equalsIgnoreCase(userConfig.getRole())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Viewers are not allowed to submit results");
+            }
+
+            // Write result to user's personal sheet
+            googleSheetsService.updateResult(userConfig.getSheetName(), matchNumber, request.getResult());
+            return ResponseEntity.ok("Result updated successfully in sheet: " + userConfig.getSheetName());
+
         } catch (IOException e) {
             log.error("Error updating result for match {}", matchNumber, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

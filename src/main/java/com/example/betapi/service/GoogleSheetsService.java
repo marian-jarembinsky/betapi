@@ -26,7 +26,7 @@ public class GoogleSheetsService {
     @Value("${google.spreadsheet.id}")
     private String spreadsheetId;
 
-    @Value("${google.spreadhseet.fifa2026.id}")
+    @Value("${google.spreadsheet.fifa2026.id}")
     private String spreadSheetFifa26Id;
 
     @Value("${google.spreadsheet.range}")
@@ -71,37 +71,23 @@ public class GoogleSheetsService {
         return matches;
     }
 
-    public void updateResult(Integer matchNumber, String result) throws IOException {
-        ValueRange response = sheetsService.spreadsheets().values()
-                .get(spreadSheetFifa26Id, range)
-                .execute();
-
-        List<List<Object>> values = response.getValues();
-
-        if (values == null || values.isEmpty()) {
-            throw new IOException("No data found in spreadsheet");
-        }
-
-        // Find the row index for the given matchNumber (skip header at index 0)
-        int rowIndex = -1;
-        for (int i = 1; i < values.size(); i++) {
-            List<Object> row = values.get(i);
-            Integer num = parseInteger(row, 0);
-            if (matchNumber.equals(num)) {
-                rowIndex = i;
-                break;
-            }
-        }
-
-        if (rowIndex == -1) {
-            throw new IOException("Match number " + matchNumber + " not found in spreadsheet");
-        }
-
-        // Spreadsheet rows are 1-based, +1 for header row
-        int sheetRowNumber = rowIndex + 1;
-
-        // Result is column H (index 7)
-        String cellRange = "Sheet1!H" + sheetRowNumber;
+    /**
+     * Writes a user's result bet into their personal sheet.
+     *
+     * User sheet structure:
+     *   A1 = "Result" (header)
+     *   A2 = result for match 1
+     *   A3 = result for match 2
+     *   A{matchNumber+1} = result for match N
+     *
+     * @param sheetName  the tab name of the user's personal sheet (from UserConfig)
+     * @param matchNumber the match number to write the result for
+     * @param result      the result string (e.g. "2:1")
+     */
+    public void updateResult(String sheetName, Integer matchNumber, String result) throws IOException {
+        // A1 is header "Result", so match 1 → A2, match 2 → A3, etc.
+        int rowNumber = matchNumber + 1;
+        String cellRange = sheetName + "!H" + rowNumber;
 
         ValueRange body = new ValueRange()
                 .setValues(Collections.singletonList(
@@ -113,7 +99,7 @@ public class GoogleSheetsService {
                 .setValueInputOption("RAW")
                 .execute();
 
-        log.info("Updated result for match {} to '{}' at row {}", matchNumber, result, sheetRowNumber);
+        log.info("Updated result for match {} to '{}' in sheet '{}' at cell A{}", matchNumber, result, sheetName, rowNumber);
     }
 
     private Match parseRowToMatch(List<Object> row) {
