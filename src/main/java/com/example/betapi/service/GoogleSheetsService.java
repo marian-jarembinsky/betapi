@@ -37,8 +37,10 @@ public class GoogleSheetsService {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"),
-            DateTimeFormatter.ofPattern("dd.M.yy HH:mm"),    // ← add this
-            DateTimeFormatter.ofPattern("d.M.yy HH:mm"),     // ← and this (single digit day)
+            DateTimeFormatter.ofPattern("dd.M.yy HH:mm"),
+            DateTimeFormatter.ofPattern("dd.M.yy H:mm"),
+            DateTimeFormatter.ofPattern("d.M.yy HH:mm"),
+            DateTimeFormatter.ofPattern("d.M.yy H:mm"),
             DateTimeFormatter.ISO_LOCAL_DATE_TIME
     };
 
@@ -72,26 +74,28 @@ public class GoogleSheetsService {
     }
 
     /**
-     * Writes a user's result bet into their personal sheet.
+     * Writes a user's result bet and update timestamp into their personal sheet.
      *
      * User sheet structure:
-     *   A1 = "Result" (header)
-     *   A2 = result for match 1
-     *   A3 = result for match 2
-     *   A{matchNumber+1} = result for match N
+     *   H1 = "Result" (header)
+     *   I1 = "Updated At" (header)
+     *   H2/I2 = result and timestamp for match 1
+     *   H3/I3 = result and timestamp for match 2
+     *   H{matchNumber+1}/I{matchNumber+1} = result and timestamp for match N
      *
      * @param sheetName  the tab name of the user's personal sheet (from UserConfig)
      * @param matchNumber the match number to write the result for
      * @param result      the result string (e.g. "2:1")
      */
     public void updateResult(String sheetName, Integer matchNumber, String result) throws IOException {
-        // A1 is header "Result", so match 1 → A2, match 2 → A3, etc.
+        // Row 1 is headers, so match 1 writes to row 2, match 2 to row 3, etc.
         int rowNumber = matchNumber + 1;
-        String cellRange = sheetName + "!H" + rowNumber;
+        String cellRange = sheetName + "!H" + rowNumber + ":I" + rowNumber;
+        String updatedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         ValueRange body = new ValueRange()
                 .setValues(Collections.singletonList(
-                        Collections.singletonList(result)
+                        List.of(result, updatedAt)
                 ));
 
         sheetsService.spreadsheets().values()
@@ -99,7 +103,8 @@ public class GoogleSheetsService {
                 .setValueInputOption("RAW")
                 .execute();
 
-        log.info("Updated result for match {} to '{}' in sheet '{}' at cell A{}", matchNumber, result, sheetName, rowNumber);
+        log.info("Updated result for match {} to '{}' in sheet '{}' at cells H{}:I{}",
+                matchNumber, result, sheetName, rowNumber, rowNumber);
     }
 
     private Match parseRowToMatch(List<Object> row) {
@@ -147,4 +152,3 @@ public class GoogleSheetsService {
         return null;
     }
 }
-

@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class MatchController {
 
     private final GoogleSheetsService googleSheetsService;
@@ -115,4 +114,3 @@ public class MatchController {
         }
     }
 }
-
